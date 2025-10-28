@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Game Over</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .leaderboard {
+            margin: 20px auto;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #00bfff;
+        }
+        .leaderboard table {
+            width: 100%;
+            border-collapse: collapse;
+            color: white;
+        }
+        .leaderboard th, .leaderboard td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #00bfff;
+        }
+        .leaderboard th {
+            color: #00bfff;
+        }
+    </style>
+</head>
+<body class="gameover">
+    <h1>💀 You Died 💀</h1>
+
+    <video id="deathVideo" width="800" autoplay playsinline>
+        <source src="{{ url_for('static', filename='gameover.mp4') }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="leaderboard">
+        <h2>🏆 Leaderboard 🏆</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Score</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for score in scores %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ score.name }}</td>
+                    <td>{{ score.score }}</td>
+                    <td>{{ score.date.strftime('%Y-%m-%d') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <br>
+    <a href="/">Play Again</a>
+
+    <script>
+        // Chrome-specific autoplay handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById("deathVideo");
+            
+            // Function to handle video playback
+            async function playVideo() {
+                try {
+                    // Start muted (Chrome requires this)
+                    video.muted = true;
+                    await video.play();
+                    
+                    // Unmute after a very short delay
+                    setTimeout(() => {
+                        // Create a user gesture simulation
+                        const userGesture = new Event('userGesture');
+                        document.dispatchEvent(userGesture);
+                        
+                        // Attempt to unmute
+                        let unmute = function() {
+                            video.muted = false;
+                            video.volume = 1;
+                        }
+                        unmute();
+                        
+                        // Backup attempt after a short delay
+                        setTimeout(unmute, 50);
+                    }, 0);
+                } catch(err) {
+                    console.log('Playback failed:', err);
+                }
+            }
+
+            // Try to play immediately
+            playVideo();
+
+            // Backup play attempt
+            setTimeout(playVideo, 100);
+
+            // Handle page visibility changes
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    playVideo();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

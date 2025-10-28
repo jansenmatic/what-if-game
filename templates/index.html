@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ball Game</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='/css/style.css') }}">
+</head>
+<body>
+    <div id="startMenu" class="menu-overlay">
+        <div class="menu-content">
+            <h1>Ball Game</h1>
+            <form id="playerForm" onsubmit="return startGame(event)">
+                <input type="text" id="playerName" placeholder="Enter your name" required>
+                <button type="submit">Start Game</button>
+            </form>
+        </div>
+    </div>
+    
+    <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+    <script src="{{ url_for('static', filename='/js/game.js') }}"></script>
+</body>
+</html>
