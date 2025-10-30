@@ -1,25 +1,174 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-
+// Global variables declaration
 let playerName = '';
 let score = 0;
 let gameStarted = false;
-let ball = { x: 400, y: 250, radius: 15, dx: 3, dy: 3 };
-let paddle = { x: 350, y: 470, width: 100, height: 10 };
+let paddle = null;
+let ball = null;
 let rightPressed = false;
 let leftPressed = false;
 let gameOver = false;
 
-// Start menu handling
-function startGame(event) {
-    event.preventDefault();
-    playerName = document.getElementById('playerName').value.trim();
-    if (playerName) {
-        document.getElementById('startMenu').style.display = 'none';
-        gameStarted = true;
-        initializeGame();
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// Set initial canvas size
+function resizeCanvas() {
+    // Default size for laptop/desktop
+    const defaultWidth = 800;
+    const defaultHeight = 500;
+    
+    if (window.innerWidth >= 840) {
+        // For laptop/desktop: use fixed dimensions
+        canvas.width = defaultWidth;
+        canvas.height = defaultHeight;
+    } else {
+        // For mobile/tablet: responsive dimensions
+        const container = document.querySelector('.game-container');
+        const containerWidth = container.clientWidth;
+        const aspectRatio = defaultWidth / defaultHeight;
+        const width = containerWidth;
+        const height = width / aspectRatio;
+        
+        canvas.width = width;
+        canvas.height = height;
     }
+    
+    // Update paddle position on resize if game is started
+    if (paddle && gameStarted) {
+        paddle.y = canvas.height - 30;
+        paddle.x = (canvas.width - paddle.width) / 2;
+    }
+}
+
+// Initial setup
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// Add event listeners for form submission
+document.addEventListener('DOMContentLoaded', function() {
+    const submitBtn = document.getElementById('submitNameBtn');
+    const playerForm = document.getElementById('playerForm');
+    
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            submitName();
+        });
+    }
+    
+    if (playerForm) {
+        playerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitName(e);
+        });
+    }
+});
+
+// Game state object to hold all game variables
+const gameState = {
+    playerName: '',
+    score: 0,
+    gameStarted: false,
+    gameOver: false,
+    rightPressed: false,
+    leftPressed: false,
+    ball: null,
+    paddle: null
+};
+
+// Mobile controls
+const leftBtn = document.getElementById('leftBtn');
+const rightBtn = document.getElementById('rightBtn');
+
+// Touch events for mobile buttons
+leftBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    leftPressed = true;
+});
+leftBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    leftPressed = false;
+});
+rightBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    rightPressed = true;
+});
+rightBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    rightPressed = false;
+});
+
+// Also support touch on canvas for paddle movement
+let touchX = null;
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    touchX = e.touches[0].clientX;
+});
+
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (touchX === null) return;
+    
+    const newX = e.touches[0].clientX;
+    if (newX < touchX) leftPressed = true;
+    if (newX > touchX) rightPressed = true;
+    touchX = newX;
+});
+
+canvas.addEventListener('touchend', () => {
+    touchX = null;
+    leftPressed = false;
+    rightPressed = false;
+});
+
+// Simple name validation
+function validateName(name) {
+    return name && name.length >= 2 && name.length <= 20;
+}
+
+// Start menu handling
+function submitName(event) {
+    // Always prevent default form submission
+    if (event) {
+        event.preventDefault();
+    }
+
+    // Get the name input
+    const nameInput = document.getElementById('playerName');
+    const name = nameInput.value.trim();
+
+    // Basic validation
+    if (!validateName(name)) {
+        alert('Please enter a valid name (2-20 characters)');
+        return false;
+    }
+
+    // Store the name
+    playerName = name;
+
+    // Update display
+    const playerForm = document.getElementById('playerForm');
+    const startButton = document.getElementById('startButton');
+    
+    // Hide form with fade out
+    playerForm.style.opacity = '0';
+    setTimeout(() => {
+        playerForm.style.display = 'none';
+        
+        // Show start button with fade in
+        startButton.style.display = 'block';
+        setTimeout(() => {
+            startButton.style.opacity = '1';
+        }, 50);
+    }, 300);
+
     return false;
+}
+
+function startGame() {
+    document.getElementById('startMenu').style.display = 'none';
+    gameStarted = true;
+    initializeGame();
 }
 
 // Event listeners for movement
@@ -121,8 +270,28 @@ function initializeGame() {
     // Reset game state
     score = 0;
     gameOver = false;
-    ball = { x: 400, y: 250, radius: 15, dx: 3, dy: 3 };
-    paddle = { x: 350, y: 470, width: 100, height: 10 };
+    
+    // Fixed sizes for laptop/desktop, relative for mobile
+    const isDesktop = window.innerWidth >= 840;
+    const paddleWidth = isDesktop ? 100 : canvas.width * 0.15;
+    const paddleHeight = isDesktop ? 10 : canvas.height * 0.02;
+    const ballRadius = isDesktop ? 15 : canvas.width * 0.02;
+    const ballSpeed = isDesktop ? 2 : canvas.width * 0.003;
+    
+    ball = {
+        x: canvas.width/2,
+        y: canvas.height/2,
+        radius: ballRadius,
+        dx: ballSpeed,
+        dy: ballSpeed
+    };
+    
+    paddle = {
+        x: (canvas.width - paddleWidth)/2,
+        y: canvas.height - paddleHeight - 20,
+        width: paddleWidth,
+        height: paddleHeight
+    };
     
     // Start the game loop
     draw();

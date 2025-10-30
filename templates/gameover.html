@@ -2,9 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Over</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
+        .gameover-container {
+            padding: 15px;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .video-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        #deathVideo {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+        }
+        
         .leaderboard {
             margin: 20px auto;
             max-width: 600px;
@@ -12,56 +31,99 @@
             padding: 20px;
             border-radius: 10px;
             border: 2px solid #00bfff;
+            box-sizing: border-box;
+            width: 95%;
         }
+        
         .leaderboard table {
             width: 100%;
             border-collapse: collapse;
             color: white;
         }
+        
         .leaderboard th, .leaderboard td {
             padding: 10px;
             text-align: center;
             border-bottom: 1px solid #00bfff;
         }
+        
         .leaderboard th {
             color: #00bfff;
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 24px;
+            }
+            
+            .leaderboard {
+                padding: 10px;
+            }
+            
+            .leaderboard th, .leaderboard td {
+                padding: 8px 4px;
+                font-size: 14px;
+            }
+            
+            .date-column {
+                display: none;
+            }
+        }
+        
+        .play-again-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #00bfff;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 18px;
+            margin: 20px 0;
+            transition: background 0.3s ease;
+        }
+        
+        .play-again-btn:hover {
+            background: #0099cc;
         }
     </style>
 </head>
 <body class="gameover">
-    <h1>💀 You Died 💀</h1>
+    <div class="gameover-container">
+        <h1>💀 You Died 💀</h1>
 
-    <video id="deathVideo" width="800" autoplay playsinline>
-        <source src="{{ url_for('static', filename='gameover.mp4') }}" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
+        <div class="video-container">
+            <video id="deathVideo" autoplay playsinline>
+                <source src="{{ url_for('static', filename='gameover.mp4') }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
 
-    <div class="leaderboard">
-        <h2>🏆 Leaderboard 🏆</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>Score</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for score in scores %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ score.name }}</td>
-                    <td>{{ score.score }}</td>
-                    <td>{{ score.date.strftime('%Y-%m-%d') }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="leaderboard">
+            <h2>🏆 Leaderboard 🏆</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Score</th>
+                        <th class="date-column">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for score in scores %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ score.name }}</td>
+                        <td>{{ score.score }}</td>
+                        <td class="date-column">{{ score.date.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <a href="/" class="play-again-btn">Play Again</a>
     </div>
-
-    <br>
-    <a href="/">Play Again</a>
 
     <script>
         // Chrome-specific autoplay handling

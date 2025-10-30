@@ -10,7 +10,7 @@ app = Flask(__name__)
 # Use PostgreSQL URL from environment variable in production, SQLite in development
 if 'POSTGRES_URL' in os.environ:
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['POSTGRES_URL']
-else:
+else: 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///leaderboard.db'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
